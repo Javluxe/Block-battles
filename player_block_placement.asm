@@ -1,7 +1,4 @@
-; =========================================
-; Player Block Placement Code (EMU8086)
-; Extracted from Block Battles Project
-; =========================================
+
 
 placeBlocks PROC
     push ax
