@@ -1,21 +1,6 @@
-; ============================================================
-; BLOCK BATTLES - Module 1: Main Menu + Instructions Screen
-; Course  : Computer Organization & Assembly Language (CEN323)
-; Group   : 13
-; Members : Fatima Asad, Shaiza Khan, Javeria Saqlain
-; ============================================================
-; LAB CONCEPTS USED IN THIS MODULE:
-;   - Lab 1  : Program structure (.model, .stack, .data, .code)
-;   - Lab 2  : BIOS Interrupts (INT 10h, INT 21h)
-;   - Lab 5  : Control Structures (cmp, je, jmp)
-;   - Lab 10 : Macros (SET_CURSOR, PRINT_STR, CLEAR_SCREEN)
-;   - Lab 11 : Procedures (showMenu, showInstructions)
-; ============================================================
-
 .model small
 .stack 100h
 
-; --- Colour Attributes ---------------------------------------
 ; Colour byte = background * 16 + foreground
 ; 0=Black 1=Blue 2=Green 3=Cyan 4=Red 5=Magenta
 ; 6=Brown 7=White 9=Lt.Blue 10=Lt.Green 11=Lt.Cyan
@@ -40,7 +25,7 @@
     menuPrompt  db '      Enter your choice: ', '$'
     menuBorder  db ' ======================================', '$'
 
-    ; -- Instructions Strings -------------------------------
+  
     insTitle    db '         I N S T R U C T I O N S      ', '$'
     ins1        db '  HOW TO PLAY:                         ', '$'
     ins2        db '  - Each player has a 5x5 grid         ', '$'
@@ -56,82 +41,44 @@
     ins12       db '  GOAL: Sink all 3 enemy blocks first! ', '$'
     insBack     db '    Press any key to return...         ', '$'
 
-    ; -- General --------------------------------------------
+  
     newline     db 13, 10, '$'
     invalidMsg  db '  Invalid choice! Try again.', 13, 10, '$'
 
 .code
 
-; ============================================================
-; MACRO: SET_CURSOR
-; Sets cursor to given row and column using INT 10h
-; Usage: SET_CURSOR row, col
-; ============================================================
+
 SET_CURSOR MACRO row, col
-    mov ah, 02h         ; INT 10h function 2 = set cursor
+    mov ah, 02h        
     mov bh, 0           ; page 0
     mov dh, row         ; row
     mov dl, col         ; column
     int 10h
 ENDM
 
-; ============================================================
-; MACRO: PRINT_STR
-; Prints a string using INT 21h function 9
-; Usage: PRINT_STR stringLabel
-; ============================================================
 PRINT_STR MACRO stringLabel
     mov ah, 09h
     lea dx, stringLabel
     int 21h
 ENDM
 
-; ============================================================
-; MACRO: SET_COLOR
-; Sets text colour attribute for next characters
-; Usage: SET_COLOR color
-; ============================================================
+
 SET_COLOR MACRO color
-    mov ah, 09h         ; write char + attribute
-    mov al, ' '         ; space character
+    mov ah, 09h         
+    mov al, ' '         
     mov bh, 0           ; page 0
     mov bl, color       ; colour attribute
-    mov cx, 1           ; once
+    mov cx, 1          
     int 10h
 ENDM
 
-; ============================================================
-; MACRO: CLEAR_SCREEN
-; Clears the entire screen using INT 10h scroll function
-; ============================================================
-CLEAR_SCREEN MACRO
-    mov ah, 06h         ; scroll up
-    mov al, 0           ; clear entire window
-    mov bh, 17h         ; blue background, white text
-    mov ch, 0           ; top row
-    mov cl, 0           ; left col
-    mov dh, 24          ; bottom row
-    mov dl, 79          ; right col
-    int 10h
-    SET_CURSOR 0, 0     ; move cursor to top-left
-ENDM
 
-; ============================================================
-; MACRO: HIDE_CURSOR
-; Hides the blinking cursor
-; ============================================================
 HIDE_CURSOR MACRO
     mov ah, 01h
     mov ch, 20h
     int 10h
 ENDM
 
-; ============================================================
-; PROCEDURE: printColored
-; Prints a string in a specific colour at a specific position
-; Input: dh = row, dl = col, bl = color, dx used for cursor
-;        si = offset of string
-; ============================================================
 printColored PROC
     push ax
     push bx
@@ -155,11 +102,7 @@ printColored PROC
     ret
 printColored ENDP
 
-; ============================================================
-; PROCEDURE: drawBox
-; Draws a decorative border box using INT 10h
-; Draws at fixed position for menu
-; ============================================================
+
 drawBox PROC
     push ax
     push bx
@@ -185,10 +128,7 @@ drawBox PROC
     ret
 drawBox ENDP
 
-; ============================================================
-; PROCEDURE: showMenu
-; Displays the main menu screen with colours
-; ============================================================
+
 showMenu PROC
     push ax
     push bx
@@ -198,7 +138,7 @@ showMenu PROC
     CLEAR_SCREEN
     HIDE_CURSOR
 
-    ; -- Print title in YELLOW (colour 14) ------------------
+   
     mov ah, 02h         ; set cursor
     mov bh, 0
     mov dh, 4           ; row 4
@@ -220,9 +160,7 @@ showMenu PROC
     jmp doneTitle
 
     doneTitle:
-    ; Print title using normal string print with colour set
-    SET_CURSOR 4, 15
-    ; Change colour to yellow by writing with attribute
+  
     mov ah, 06h
     mov al, 0
     mov bh, 1Eh         ; yellow on blue
@@ -237,7 +175,7 @@ showMenu PROC
     lea dx, menuTitle
     int 21h
 
-    ; -- Print subtitle in CYAN ------------------------------
+
     SET_CURSOR 6, 15
     mov ah, 06h
     mov al, 0
@@ -253,13 +191,12 @@ showMenu PROC
     lea dx, menuSub
     int 21h
 
-    ; -- Top border ------------------------------------------
     SET_CURSOR 8, 15
     mov ah, 09h
     lea dx, menuBorder
     int 21h
 
-    ; -- Option 1: Play in GREEN -----------------------------
+
     SET_CURSOR 9, 15
     mov ah, 06h
     mov al, 0
@@ -275,7 +212,7 @@ showMenu PROC
     lea dx, menuOpt1
     int 21h
 
-    ; -- Option 2: Instructions in YELLOW -------------------
+
     SET_CURSOR 10, 15
     mov ah, 06h
     mov al, 0
@@ -291,7 +228,7 @@ showMenu PROC
     lea dx, menuOpt2
     int 21h
 
-    ; -- Option 3: Quit in RED -------------------------------
+  
     SET_CURSOR 11, 15
     mov ah, 06h
     mov al, 0
@@ -307,13 +244,13 @@ showMenu PROC
     lea dx, menuOpt3
     int 21h
 
-    ; -- Bottom border ---------------------------------------
+    
     SET_CURSOR 12, 15
     mov ah, 09h
     lea dx, menuBorder
     int 21h
 
-    ; -- Prompt ----------------------------------------------
+   
     SET_CURSOR 14, 15
     mov ah, 09h
     lea dx, menuPrompt
@@ -326,10 +263,7 @@ showMenu PROC
     ret
 showMenu ENDP
 
-; ============================================================
-; PROCEDURE: showInstructions
-; Displays the instructions screen
-; ============================================================
+
 showInstructions PROC
     push ax
     push bx
@@ -339,8 +273,7 @@ showInstructions PROC
     CLEAR_SCREEN
     HIDE_CURSOR
 
-    ; -- Title in YELLOW -------------------------------------
-    SET_CURSOR 2, 12
+  
     mov ah, 06h
     mov al, 0
     mov bh, 1Eh         ; yellow on blue
@@ -355,13 +288,12 @@ showInstructions PROC
     lea dx, insTitle
     int 21h
 
-    ; -- Border ----------------------------------------------
     SET_CURSOR 3, 12
     mov ah, 09h
     lea dx, menuBorder
     int 21h
 
-    ; -- How to play heading in CYAN -------------------------
+   
     SET_CURSOR 4, 12
     mov ah, 06h
     mov al, 0
@@ -377,7 +309,7 @@ showInstructions PROC
     lea dx, ins1
     int 21h
 
-    ; -- Instructions lines in WHITE -------------------------
+    
     SET_CURSOR 5, 12
     mov ah, 09h
     lea dx, ins2
@@ -403,7 +335,6 @@ showInstructions PROC
     lea dx, ins6
     int 21h
 
-    ; -- Symbols heading in CYAN -----------------------------
     SET_CURSOR 11, 12
     mov ah, 06h
     mov al, 0
@@ -419,7 +350,6 @@ showInstructions PROC
     lea dx, ins7
     int 21h
 
-    ; -- Symbol lines ----------------------------------------
     SET_CURSOR 12, 12
     mov ah, 09h
     lea dx, ins8
@@ -460,7 +390,6 @@ showInstructions PROC
     lea dx, ins11
     int 21h
 
-    ; -- Goal in GREEN ---------------------------------------
     SET_CURSOR 17, 12
     mov ah, 06h
     mov al, 0
@@ -476,13 +405,13 @@ showInstructions PROC
     lea dx, ins12
     int 21h
 
-    ; -- Border ----------------------------------------------
+  
     SET_CURSOR 18, 12
     mov ah, 09h
     lea dx, menuBorder
     int 21h
 
-    ; -- Press any key ---------------------------------------
+
     SET_CURSOR 20, 12
     mov ah, 09h
     lea dx, insBack
@@ -499,9 +428,7 @@ showInstructions PROC
     ret
 showInstructions ENDP
 
-; ============================================================
-; MAIN PROGRAM
-; ============================================================
+
 main PROC
     ; Setup data segment
     mov ax, @data
@@ -516,7 +443,7 @@ menuLoop:
     int 21h
     ; AL now holds the ASCII of pressed key
 
-    ; -- Check choice ----------------------------------------
+   
     cmp al, '1'
     je  startGame       ; Jump to game (Module 2+)
 
@@ -526,7 +453,7 @@ menuLoop:
     cmp al, '3'
     je  quitGame        ; Quit
 
-    ; Invalid input — show message and loop back
+    ; Invalid input Â— show message and loop back
     SET_CURSOR 16, 15
     mov ah, 09h
     lea dx, invalidMsg
@@ -538,13 +465,13 @@ goInstructions:
     jmp menuLoop        ; Return to menu after instructions
 
 startGame:
-    ; -- Placeholder — Module 2 will go here -----------------
+   
     CLEAR_SCREEN
     SET_CURSOR 10, 20
     mov ah, 09h
-    lea dx, menuTitle   ; Temp — will be replaced by game screen
+    lea dx, menuTitle   ; Temp Â— will be replaced by game screen
     int 21h
-    jmp menuLoop        ; Loop back for now
+    jmp menuLoop       
 
 quitGame:
     ; Restore normal screen and exit
